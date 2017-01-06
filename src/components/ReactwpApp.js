@@ -19,20 +19,38 @@ var imgDatas = require('../data/imagesData.json');
 function arrange(low,high){
      return Math.ceil(Math.random() * (high - low) + low);
 };
+function Rotate(){
+    return (Math.random() > 0.5 ? "" : "-") + Math.ceil((Math.random() * 30));
+};
 var ImgFigure = React.createClass({
+    handleClick:function(e){
+        this.props.inverseDa();
+     e.stopPropagation();
+     e.preventDefault();
+    },
     render:function(){
         var styleObj = {};
         if(this.props.agData.pos){
             styleObj = this.props.agData.pos;
         }
+       if(this.props.agData.rotate){
+           (['-mos-',"-webkit-","-ms-",""]).forEach(function(value){
+               styleObj[value + "transform"] = "rotate(" + this.props.agData.rotate + "deg)";
+           }.bind(this))
+       }
+        var imgFigureCs = 'img-figure';
+             imgFigureCs += this.props.agData.isInverse ?  " is-inverse" : "";
         return (
             <div>
-                <figure className="img-figure" style={styleObj}>
+                <figure className={imgFigureCs} style={styleObj} onClick={this.handleClick}>
                     <img src={this.props.data.imgURL} alt={this.props.data.fileName}/>
                     <figcaption>
                         <h2 className="img-title">
                             {this.props.data.title}
                         </h2>
+                        <div className="img-back" onclick={this.handleClick}>
+                            {this.props.data.desc}
+                        </div>
                     </figcaption>
                 </figure>
             </div>
@@ -56,6 +74,16 @@ var ReactwpApp = React.createClass({
             topY:[0,0]
         }
     },
+    inverse:function(index){
+        return function(){
+            var imgArr = this.state.imgArr;
+                imgArr[index].isInverse = !imgArr[index].isInverse;
+            this.setState({
+                imgArr:imgArr
+            })
+        }.bind(this)
+
+    },
     rerrange:function(){
         var imgArr = this.state.imgArr,
             Constant = this.Constant,
@@ -74,10 +102,13 @@ var ReactwpApp = React.createClass({
             imgCenter[0].pos = centPos;
         topImg = imgArr.splice(centNum - topNum,topNum);
             topImg.forEach(function(value,index){
-                topImg[index].pos = {
-                   left:arrange(vPosx[0],vPosx[1]),
-                    top:arrange(vPosY[0],vPosY[1]),
-                    background:"pink"
+                topImg[index] = {
+                   pos:{
+                       left:arrange(vPosx[0],vPosx[1]),
+                       top:arrange(vPosY[0],vPosY[1]),
+                       background:"pink"
+                   },
+                    rotate:Rotate(),
                 }
             })
            for(var i = 0,j = imgArr.length, k = j /2;i<j;i++){
@@ -87,9 +118,12 @@ var ReactwpApp = React.createClass({
                }else{
                    posOr = hPosRx
                }
-               imgArr[i].pos = {
-                   left:arrange(posOr[0],posOr[1]),
-                   top:arrange(hPosY[0],hPosY[1])
+               imgArr[i] = {
+                   pos:{
+                       left:arrange(posOr[0],posOr[1]),
+                       top:arrange(hPosY[0],hPosY[1])
+                   },
+                   rotate:Rotate()
                }
            }
           imgArr.splice(centNum,0,imgCenter[0]);
@@ -107,13 +141,15 @@ var ReactwpApp = React.createClass({
     getInitialState:function(){
         return {
             imgArr:[
-                //{
-                //    pos:{
-                //  left:0,
-                //    right:0,
-                //    top:0
-                //}
-
+        //        {
+        //            pos:{
+        //          left:0,
+        //            right:0,
+        //            top:0
+        //        },
+        //         rotate:0,
+        //         isInverse:false,
+        //
         //}
             ]
     }
@@ -134,7 +170,7 @@ var ReactwpApp = React.createClass({
 
         this.Constant.centerPos = {
             left:halfStageW - imgWh,
-            top:stageH - imgH,
+            top:halfStageH - imgHh,
             zIndex:9999,
             color:"red",
             background:"yellow"
@@ -143,22 +179,23 @@ var ReactwpApp = React.createClass({
         this.Constant.hPosA.rightX = [halfStageW + imgWh * 1.5, stageW - imgW];
         this.Constant.hPosA.topY = [-imgHh, stageH - imgHh];
         this.Constant.vPosA.x = [halfStageW - imgW, halfStageW + imgW / 3];
-        this.Constant.vPosA.topY = [ -imgHh, stageH - imgH * 1.7];
+        this.Constant.vPosA.topY = [ -imgH, -imgHh ];
         this.rerrange();
     },
     render:function(){
         var controllerUnits = [],imgFigures = [];
-        console.log(this.state.imgArr)
         imgDatas.forEach(function(value,index){
             if(!this.state.imgArr[index]){
                 this.state.imgArr[index] = {
                     pos:{
                         left:0,
                         top:0
-                    }
+                    },
+                    rotate:0,
+                    isInverse:false
                 }
             }
-           imgFigures.push(<ImgFigure data ={value} ref={"imgFigure" + index} agData={this.state.imgArr[index]} />);
+           imgFigures.push(<ImgFigure data ={value} ref={"imgFigure" + index} agData={this.state.imgArr[index]} inverseDa={this.inverse(index)}/>);
         }.bind(this));
         return(
             <div>
