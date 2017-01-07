@@ -22,6 +22,30 @@ function arrange(low,high){
 function Rotate(){
   return (Math.random() > 0.5 ? "" : "-") + Math.ceil(Math.random() * 30);
 };
+var ControllerUnits = React.createClass({
+    handleClick:function(e){
+        if(this.props.agData.isCenter){
+            this.props.inverse();
+        }else{
+            this.props.Center();
+        }
+        e.preventDefault();
+        e.stopPropagation();
+    },
+    render:function(){
+        var contCs = "controller-units";
+           if(this.props.agData.isCenter){
+               contCs += " is-center";
+               if(this.props.agData.isInverse){
+                   contCs += " is-inverse";
+               }
+           }
+        return(
+
+                <span className={contCs} onClick={this.handleClick}></span>
+        )
+    }
+})
 var ImgFigure = React.createClass({
     handleClick:function(e){
         if(this.props.agData.isCenter){
@@ -39,8 +63,8 @@ var ImgFigure = React.createClass({
             styleObj = this.props.agData.pos;
         }
         if(this.props.agData.rotate){
-            (['-o-',"-moz-","-webkit-",""]).forEach(function(value){
-                styleObj[value + "transform"] = "rotate(" + this.props.agData.rotate + "deg)";
+            (['msTransform',"MozTransform","WebkitTransform","transform"]).forEach(function(value){
+                styleObj[value + ""] = "rotate(" + this.props.agData.rotate + "deg)";
             }.bind(this))
         }
         var imgFgCs = "img-figure";
@@ -152,7 +176,7 @@ var ReactwpApp = React.createClass({
             this.setState({
                 imgArr:imgArr
             })
-
+           debugger;
     },
     getInitialState:function(){
         return {
@@ -192,16 +216,17 @@ var ReactwpApp = React.createClass({
             //background:"yellow"
         };
         this.Constant.hPosA.leftX = [-imgWh,halfStageW - imgWh * 2.5];
-        this.Constant.hPosA.rightX = [halfStageW + imgWh * 1.5, stageW - imgW];
+        this.Constant.hPosA.rightX = [halfStageW + imgWh * 1.5, stageW - imgWh];
         this.Constant.hPosA.topY = [-imgHh, stageH - imgHh];
         this.Constant.vPosA.x = [halfStageW - imgW, halfStageW + imgW / 3];
         this.Constant.vPosA.topY = [ -imgH, -imgHh ];
-        var centImg = Math.ceil(Math.random() * this.state.imgArr.length),topNum=0;
+        var centImg = Math.abs(Math.ceil(Math.random() * this.state.imgArr.length -1));
 
         this.rerrange(centImg);
     },
     render:function(){
-        var controllerUnits = [],imgFigures = [];
+        var controllerUnits = [],imgFigures = [],
+            stageH ={height:window.innerHeight};
         imgDatas.forEach(function(value,index){
             if(!this.state.imgArr[index]){
                 this.state.imgArr[index] = {
@@ -215,10 +240,11 @@ var ReactwpApp = React.createClass({
                 }
             }
            imgFigures.push(<ImgFigure data ={value} numb={index} ref={"imgFigure" + index} agData={this.state.imgArr[index]} inverse={this.inverse(index)} Center={this.Center(index)} />);
+           controllerUnits.push(< ControllerUnits agData={this.state.imgArr[index]} inverse ={this.inverse(index)} Center={this.Center(index)}/>)
         }.bind(this));
         return(
             <div>
-                <section className="stage" ref="stage">
+                <section className="stage" ref="stage" style={stageH}>
                     <section className="img-sec">
                         {imgFigures}
                     </section>
