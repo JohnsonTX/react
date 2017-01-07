@@ -19,6 +19,12 @@ html,body{
     height: 100%;
     overflow: hidden;
     background-color: #ddd;
+    perspective: 1600px;
+    $Rotate:random()*360;
+    @keyframes cicle {
+      from {transform:rotate(0deg)}
+      to {transform: rotate($Rotate+deg)}
+    }
     @at-root {
       .img-figure{
         position: absolute;
@@ -31,11 +37,12 @@ html,body{
         border-radius:7px;
         box-shadow: 1px 2px 3px black;
         img{width: 100%;height: 100%}
-        transition: width 2s,transform 2s;
+        transform-origin: 0 50% 0;
+        transition: width 2s,transform .6s ease-in-out ,left .6s ease-in-out,top .6s ease-in-out;
         transform-style: preserve-3d;
-        perspective:600px;
+        cursor:pointer;
         &.is-inverse{
-          transform: rotateY(-180deg);
+          transform:translate(320px) rotateY(180deg);
         }
 
       }
@@ -57,8 +64,10 @@ html,body{
         box-sizing: border-box;
         text-align: center;
         color: #666;
-        transform: rotateY(180deg);
-        background: #fff;
+        transition: width 2s,transform .6s ease-in-out,left .6s ease-in-out,top .6s ease-in-out;
+        transform-style: preserve-3d;
+        transform: rotateY(180deg) translateZ(1px);
+        background: white;
       }
     }
 
