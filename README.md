@@ -1,2 +1,2 @@
-### 最早用react做的笑插件
+### 幻灯插件
 >https://johnsontx.github.io/reactpc/
